@@ -73,9 +73,12 @@ endif()
 
 add_executable(${PROJECT_NAME}
         ptor_defines.hpp
+        ptor_options.hpp
         ptor_types.hpp
+        util/util_i_function.hpp
 
         ptor_main.cpp
+        ptor_options.cpp
         )
 
 configure_file(
@@ -83,6 +86,8 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/ptor_version.hpp
     @ONLY
 )
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

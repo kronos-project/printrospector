@@ -14,9 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdio>
+#include "ptor_options.hpp"
 
 int main(int argc, char **argv) {
-    std::puts("TODO");
+    auto options = ptor::ParseOptionsFromArgs(argc, argv);
     return 0;
 }
