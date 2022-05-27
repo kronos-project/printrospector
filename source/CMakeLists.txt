@@ -72,6 +72,9 @@ endif()
 ###########################
 
 add_executable(${PROJECT_NAME}
+        ptor_defines.hpp
+        ptor_types.hpp
+
         ptor_main.cpp
         )
 

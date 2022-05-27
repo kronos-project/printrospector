@@ -62,27 +62,13 @@ Makefile*
 [Dd]ebug/
 [Rr]elease/
 
-# Reversing stuffs
-/reversing/
-
-# IDA database files
-*.id0
-*.id1
-*.id2
-*.idb
-*.i64
-*.nam
-*.til
-
-# Ghidra project files
-*.gpr
-*.rep/
-
-# Network traffic captures
-*.pcapng
-
 # Game type list
 types.json
+*Wizard*.json
+
+# Serialized ObjectProperty state
+*.xml
+*.bin
 
 # Python
 __pycache__/
