@@ -1,0 +1,92 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Miscellaneous system files
+.DS_Store
+*~
+._*
+.env
+Thumbs.db
+
+# Editor files
+.idea/
+.vs/
+.vscode/
+cmake-build-*/
+*.swp
+CMakeLists.txt.user
+CMakeLists.txt.user.*
+CMakeSettings.json
+
+# CMake helpers
+*CMakeFiles*/
+CMakeCache.txt
+*cmake_install.cmake*
+Makefile*
+
+# Build output directories
+[Bb]last-*/
+[Bb]in/
+[Bb]uild/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# Reversing stuffs
+/reversing/
+
+# IDA database files
+*.id0
+*.id1
+*.id2
+*.idb
+*.i64
+*.nam
+*.til
+
+# Ghidra project files
+*.gpr
+*.rep/
+
+# Network traffic captures
+*.pcapng
+
+# Game type list
+types.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info
