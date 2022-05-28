@@ -73,12 +73,14 @@ endif()
 
 add_executable(${PROJECT_NAME}
         ptor_defines.hpp
-        ptor_options.hpp
         ptor_types.hpp
+
         util/util_i_function.hpp
 
-        ptor_main.cpp
-        ptor_options.cpp
+        bin/cli_option_processor.hpp
+        bin/cli_options.hpp
+        bin/cli_options.cpp
+        bin/ptor_main.cpp
         )
 
 configure_file(

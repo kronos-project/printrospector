@@ -55,12 +55,12 @@ CMakeCache.txt
 Makefile*
 
 # Build output directories
-[Bb]last-*/
-[Bb]in/
-[Bb]uild/
-[Oo]bj/
-[Dd]ebug/
-[Rr]elease/
+/[Bb]last-*/
+/[Bb]in/
+/[Bb]uild/
+/[Oo]bj/
+/[Dd]ebug/
+/[Rr]elease/
 
 # Game type list
 types.json

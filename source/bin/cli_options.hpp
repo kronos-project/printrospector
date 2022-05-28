@@ -17,10 +17,9 @@
 
 #include <optional>
 
-#include "ptor_defines.hpp"
 #include "ptor_types.hpp"
 
-namespace ptor {
+namespace ptor::cli {
 
     enum class SerializeOpt {
         Serialize,
@@ -45,10 +44,10 @@ namespace ptor {
         SerializeOpt serialize_opt = SerializeOpt::Deserialize;
         InputType input_type = InputType::Unknown;
         const char *input = nullptr;
-        const char *output = nullptr;
+        fs::path output{};
 
         /* Path to the wizwalker type list. */
-        const char *type_list = nullptr;
+        fs::path type_list{};
 
         /* Binary serializer configuration. */
         SerializerType serializer_type = SerializerType::Basic;
