@@ -52,7 +52,7 @@ namespace ptor::cli {
                 opts.input_type = InputType::ObjectProperty_Hex;
                 opts.input_hex = value;
             }),
-            MakeProcessor("file", 'f', [](Options &opts, const char *value) {
+            MakeProcessor("infile", 'i', [](Options &opts, const char *value) {
                 opts.input_type = InputType::ObjectProperty_File;
                 opts.input_file = value;
                 return opts.input_file.has_filename();
