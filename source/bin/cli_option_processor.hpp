@@ -37,11 +37,13 @@ namespace ptor::cli {
         const char *name;
         char short_name;
         bool takes_arg;
+        const char *short_help;
+        const char *help;
 
     public:
-        OptionProcessor(const char *n, char sn, bool ta, auto f)
+        OptionProcessor(const char *n, char sn, const char *sh, const char *h, bool ta, auto f)
             : m_callback(*reinterpret_cast<const decltype(CallbackType::Make(f)) *>(m_handler_storage)),
-              name(n), short_name(sn), takes_arg(ta)
+              name(n), short_name(sn), takes_arg(ta), short_help(sh), help(h)
         {
             using FunctionType = decltype(CallbackType::Make(f));
             static_assert(sizeof(m_handler_storage) >= sizeof(FunctionType));
@@ -54,31 +56,24 @@ namespace ptor::cli {
     };
 
     /* Creates a new `OptionProcessor` from option name and parser callback. */
-    P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, char sn, auto f) {
+    P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, char sn, const char *sh, const char *h, auto f) {
         if constexpr (requires { f(std::declval<Options &>(), std::declval<const char *>()); }) {
             if constexpr (std::convertible_to<decltype(f(std::declval<Options &>(), std::declval<const char *>())), bool>) {
-                return OptionProcessor(n, sn, true, f);
+                return OptionProcessor(n, sn, sh, h, true, f);
             } else {
-                return OptionProcessor(n, sn, true, [&](Options &opts, const char *str) -> bool { f(opts, str); return true; });
+                return OptionProcessor(n, sn, sh, h, true, [&](Options &opts, const char *str) -> bool { f(opts, str); return true; });
             }
         } else {
             if constexpr (std::convertible_to<decltype(f(std::declval<Options &>())), bool>) {
-                return OptionProcessor(n, sn, false, [&](Options &opts, const char *) -> bool { return f(opts); });
+                return OptionProcessor(n, sn, sh, h, false, [&](Options &opts, const char *) -> bool { return f(opts); });
             } else {
-                return OptionProcessor(n, sn, false, [&](Options &opts, const char *) -> bool { f(opts); return true; });
+                return OptionProcessor(n, sn, sh, h, false, [&](Options &opts, const char *) -> bool { f(opts); return true; });
             }
         }
     }
 
-    namespace impl {
-
-        template <typename T>
-        concept NotCharacter = !std::convertible_to<char, T>;
-
-    }
-
-    P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, impl::NotCharacter auto f) {
-        return MakeProcessor(n, '\0', f);
+    P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, const char *sh, const char *h, auto f) {
+        return MakeProcessor(n, '\0', sh, h, f);
     }
 
 }

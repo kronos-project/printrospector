@@ -30,77 +30,181 @@ namespace ptor::cli {
                 char *end;
                 errno = 0;
                 value = std::strtoul(str, &end, 0);
-                success = (str != end && errno == 0);
+                success = (str != end && *end == '\0' && errno == 0);
             }
             return value;
         }
 
         /* Global list of `OptionProcessor`s for all command-line options we accept. */
         const OptionProcessor g_option_processors[] = {
-            MakeProcessor("serialize-opt", 'd', [](Options &opts, const char *value) {
-                if (std::strcmp(value, "ser") == 0) {
-                    opts.serialize_opt = SerializeOpt::Serialize;
-                } else if (std::strcmp(value, "de") == 0) {
-                    opts.serialize_opt = SerializeOpt::Deserialize;
-                } else {
-                    return false;
-                }
+            MakeProcessor(
+                "serialize-opt", 'd', "choose between deserialization (default) and serialization",
+                "printrospector lets you choose between whether the input source should be"
+                "interpreted as data to serialize or as data to deserialize.\n\n"
+                "Supported values to this option are:\n\n"
+                "    - ser: Serializes the input data.\n"
+                "    - de:  Deserializes the input data.",
+                [](Options &opts, const char *value) {
+                    if (std::strcmp(value, "ser") == 0) {
+                        opts.serialize_opt = SerializeOpt::Serialize;
+                    } else if (std::strcmp(value, "de") == 0) {
+                        opts.serialize_opt = SerializeOpt::Deserialize;
+                    } else {
+                        return false;
+                    }
 
-                return true;
-            }),
-            MakeProcessor("data-kind", 'k', [](Options &opts, const char *value) {
-                if (std::strcmp(value, "op") == 0) {
-                    opts.data_kind = DataKind::ObjectProperty;
-                } else {
-                    return false;
+                    return true;
                 }
+            ),
+            MakeProcessor(
+                "data-kind", 'k', "the type of data to process; defaults to op",
+                "printrospector supports processing data in various different formats:\n\n"
+                "    op - Serialization and deserialization of ObjectProperty binary state. [default]\n\n"
+                "Specified inputs should be in the correct format.",
+                [](Options &opts, const char *value) {
+                    if (std::strcmp(value, "op") == 0) {
+                        opts.data_kind = DataKind::ObjectProperty;
+                    } else {
+                        return false;
+                    }
 
-                return true;
-            }),
-            MakeProcessor("hex", [](Options &opts, const char *value) {
-                opts.input_type = InputType::Hex;
-                opts.input_hex = value;
-            }),
-            MakeProcessor("infile", 'i', [](Options &opts, const char *value) {
-                opts.input_type = InputType::File;
-                opts.input_file = value;
-                return opts.input_file.has_filename();
-            }),
-            MakeProcessor("out", 'o', [](Options &opts, const char *value) {
-                opts.output = value;
-                return opts.output.has_filename();
-            }),
-            MakeProcessor("type-list", 't', [](Options &opts, const char *value) {
-                opts.type_list = value;
-                return opts.type_list.has_filename();
-            }),
-            MakeProcessor("serializer-type", 's', [](Options &opts, const char *value) {
-                if (std::strcmp(value, "basic") == 0) {
-                    opts.serializer_type = SerializerType::Basic;
-                } else if (std::strcmp(value, "core") == 0) {
-                    opts.serializer_type = SerializerType::CoreObject;
-                } else if (std::strcmp(value, "mannequin") == 0) {
-                    opts.serializer_type = SerializerType::Mannequin;
-                } else {
-                    return false;
+                    return true;
                 }
+            ),
+            MakeProcessor(
+                "hex", "specifies a string of hexadecimal data as an input source",
+                "As an alternative to reading file contents, we also support hexadecimal-encoded strings.\n\n"
+                "Every byte is encoded as two digits without a `0x` prefix: 05 ab 13.\n"
+                "The following showcases some examples of how this would look like:\n\n"
+                "    - printrospector --hex \"f0 0d ba be\"\n"
+                "    - printrospector --hex \"abcd1234f0f0\"\n\n"
+                "Make sure to always quote your string in \"\" when using spaces as they will otherwise be "
+                "interpreted as separate arguments.\n\n"
+                "Note: When this option is followed by [--infile/-in], it will be ignored. Only one source "
+                "of input is allowed at a time.",
+                [](Options &opts, const char *value) {
+                    opts.input_type = InputType::Hex;
+                    opts.input_hex = value;
+                }
+            ),
+            MakeProcessor(
+                "infile", 'i', "specifies a path to a file that will be used as an input source",
+                "As an alternative to specifying hexadecimal data with the [--hex] option, printrospector"
+                "supports reading the contents of binary files by path.\n\n"
+                "Relative and absolute paths are supported.\n\n"
+                "Note: When this option is followed by [--hex], it will be ignored. Only one source of "
+                "input is allowed at a time.",
+                [](Options &opts, const char *value) {
+                    opts.input_type = InputType::File;
+                    opts.input_file = value;
+                    return opts.input_file.has_filename();
+                }
+            ),
+            MakeProcessor(
+                "out", 'o', "specifies a path to the output file for (de)serialized contents",
+                "When this option is missing, information will be printed to stdout on a"
+                "best-effort basis without producing any persistent data.",
+                [](Options &opts, const char *value) {
+                    opts.output = value;
+                    return opts.output.has_filename();
+                }
+            ),
+            MakeProcessor(
+                "type-list", 't', "specifies a wizwalker type list file",
+                "The type list is a big JSON dump of type information crafted for ObjectProperty "
+                "runtime reflection.\n\n"
+                "Said file can be obtained using https://github.com/StarrFox/wizwalker. Refer "
+                "to its GitHub page for installation and instructions. Once that is done, run\n\n"
+                "    wizwalker dump json\n\n"
+                "with an open instance of the game to obtain a game named similarly to "
+                "r707528_Wizard_1_460.json.\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts, const char *value) {
+                    opts.type_list = value;
+                    return opts.type_list.has_filename();
+                }
+            ),
+            MakeProcessor(
+                "serializer-type", 's', "the ObjectProperty serializer type to use",
+                "This selects one of three different ObjectProperty binary serializer subclasses "
+                "found throughout KingsIsle games:\n\n"
+                "    - basic: what is known as SerializerBinary, this is the most commonly used instance\n"
+                "    - core: what is known as SerializerCoreObjects, for in-game entities known as CoreObjects\n"
+                "    - mannequin: what is known as SerializerMannequin, for mannequin objects\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts, const char *value) {
+                    if (std::strcmp(value, "basic") == 0) {
+                        opts.serializer_type = SerializerType::Basic;
+                    } else if (std::strcmp(value, "core") == 0) {
+                        opts.serializer_type = SerializerType::CoreObject;
+                    } else if (std::strcmp(value, "mannequin") == 0) {
+                        opts.serializer_type = SerializerType::Mannequin;
+                    } else {
+                        return false;
+                    }
 
-                return true;
-            }),
-            MakeProcessor("serializer-flags", 'f', [](Options &opts, const char *value) {
-                bool result = false;
-                opts.serializer_flags = IntParseHelper(value, result) & 0x1F;
-                return result;
-            }),
-            MakeProcessor("property-mask", 'm', [](Options &opts, const char *value) {
-                bool success = false;
-                opts.property_mask = IntParseHelper(value, success);
-                return success;
-            }),
-            MakeProcessor("shallow", [](Options &opts) { opts.shallow = true; }),
-            MakeProcessor("manual-compression", 'c', [](Options &opts) { opts.manual_compression = true; }),
-            MakeProcessor("quiet", 'q', [](Options &opts) { opts.quiet = true; }),
-            MakeProcessor("skip-unknown", [](Options &opts) { opts.skip_unknown = true; })
+                    return true;
+                }
+            ),
+            MakeProcessor(
+                "serializer-flags", 'f', "configuration bits for ObjectProperty serialization",
+                "Serializer flags are represented as a bit mask on an integer. They actively "
+                "influence the output of serialization/deserialization of data.\n\n"
+                "The game supports the following bits:\n"
+                "    - Bit 0: Stateful flags: The binary data store the configuration.\n"
+                "    - Bit 1: Compact length prefixes: String and sequence lengths are stored size-efficient.\n"
+                "    - Bit 2: Human readable enums: Instead of an integral value, string variants will be stored.\n"
+                "    - Bit 3: Compressed: The data will be zlib-compressed for size efficiency.\n"
+                "    - Bit 4: Require optional values: Optional values may not be missing in the state.\n\n"
+                "In more practical terms, inputs ranging between 0 and 32 will be accepted. Greater values are "
+                "truncated by default.\n\n"
+                "Input can be either in decimal or in hexadecimal (using a 0x prefix).\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts, const char *value) {
+                    bool result = false;
+                    opts.serializer_flags = IntParseHelper(value, result) & 0x1F;
+                    return result;
+                }
+            ),
+            MakeProcessor(
+                "property-mask", 'm', "specifies a mask of property bit flags for ObjectProperty (de)serialization",
+                "In the ObjectProperty system, every property has a set of bit flags assigned which are "
+                "referred to as property flags.\n\n"
+                "Given the mask, the serializer filters out all properties which are not an intersection of it.\n"
+                "The default value is 0x18, you may specify any 32-bit value with this option instead.\n\n"
+                "Input can be either in decimal or in hexadecimal (using a 0x prefix).\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts, const char *value) {
+                    bool success = false;
+                    opts.property_mask = IntParseHelper(value, success);
+                    return success;
+                }
+            ),
+            MakeProcessor(
+                "shallow", "forces shallow (de)serialization of ObjectProperty state",
+                "ObjectProperty serialization supports a shallow and a deep mode.\n"
+                "The shallow mode sequentially writes all values whereas deep mode tags each value with "
+                "its hash and bit size to integrity-check.\n\n"
+                "Most persistent state in files is serialized in deep mode; settings this option is "
+                "usually not necessary.\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts) { opts.shallow = true; }
+            ),
+            MakeProcessor(
+                "manual-compression", 'c', "uncompress ObjectProperty state before processing",
+                "Every so often it happens that ObjectProperty binary state gets compressed manually "
+                "instead of utilizing the designated serializer configuration bit (see [--serializer-flags/-f]).\n\n"
+                "The output then differs in a way that cannot be handled by specifying said flag which "
+                "is the reason why this is a separate option.\n\n"
+                "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
+                [](Options &opts) { opts.manual_compression = true; }
+            ),
+            MakeProcessor(
+                "quiet", 'q', "do all processing quietly",
+                "By default, printrospector will log relevant details and progress to stdout/stderr.\n\n"
+                "Users who find this behavior undesirable may specify this option for silent operation.",
+                [](Options &opts) { opts.quiet = true; }
+            ),
         };
 
         /* Implementation details of option parsing code. */
