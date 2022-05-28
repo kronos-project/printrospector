@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include <type_traits>
+
 #include "ptor_defines.hpp"
 #include "bin/cli_options.hpp"
 #include "util/util_i_function.hpp"
@@ -66,6 +68,17 @@ namespace ptor::cli {
                 return OptionProcessor(n, sn, false, [&](Options &opts, const char *) -> bool { f(opts); return true; });
             }
         }
+    }
+
+    namespace impl {
+
+        template <typename T>
+        concept NotCharacter = !std::convertible_to<char, T>;
+
+    }
+
+    P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, impl::NotCharacter auto f) {
+        return MakeProcessor(n, '\0', f);
     }
 
 }

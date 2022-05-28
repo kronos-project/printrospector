@@ -43,7 +43,8 @@ namespace ptor::cli {
         /* Input/output sources for data to serialize/deserialize. */
         SerializeOpt serialize_opt = SerializeOpt::Deserialize;
         InputType input_type = InputType::Unknown;
-        const char *input = nullptr;
+        const char *input_hex = nullptr;
+        fs::path input_file{};
         fs::path output{};
 
         /* Path to the wizwalker type list. */

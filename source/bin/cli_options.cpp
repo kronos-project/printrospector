@@ -24,8 +24,75 @@ namespace ptor::cli {
 
     namespace {
 
+        inline u32 IntParseHelper(const char *str, bool &success) {
+            u32 value;
+            {
+                char *end;
+                errno = 0;
+                value = std::strtoul(str, &end, 0);
+                success = (str != end && errno == 0);
+            }
+            return value;
+        }
+
         /* Global list of `OptionProcessor`s for all command-line options we accept. */
-        const OptionProcessor g_option_processors[] = {};
+        const OptionProcessor g_option_processors[] = {
+            MakeProcessor("serialize-opt", 'd', [](Options &opts, const char *value) {
+                if (std::strcmp(value, "ser") == 0) {
+                    opts.serialize_opt = SerializeOpt::Serialize;
+                } else if (std::strcmp(value, "de") == 0) {
+                    opts.serialize_opt = SerializeOpt::Deserialize;
+                } else {
+                    return false;
+                }
+
+                return true;
+            }),
+            MakeProcessor("hex", [](Options &opts, const char *value) {
+                opts.input_type = InputType::ObjectProperty_Hex;
+                opts.input_hex = value;
+            }),
+            MakeProcessor("file", 'f', [](Options &opts, const char *value) {
+                opts.input_type = InputType::ObjectProperty_File;
+                opts.input_file = value;
+                return opts.input_file.has_filename();
+            }),
+            MakeProcessor("out", 'o', [](Options &opts, const char *value) {
+                opts.output = value;
+                return opts.output.has_filename();
+            }),
+            MakeProcessor("type-list", 't', [](Options &opts, const char *value) {
+                opts.type_list = value;
+                return opts.type_list.has_filename();
+            }),
+            MakeProcessor("serializer-type", 's', [](Options &opts, const char *value) {
+                if (std::strcmp(value, "basic") == 0) {
+                    opts.serializer_type = SerializerType::Basic;
+                } else if (std::strcmp(value, "core") == 0) {
+                    opts.serializer_type = SerializerType::CoreObject;
+                } else if (std::strcmp(value, "mannequin") == 0) {
+                    opts.serializer_type = SerializerType::Mannequin;
+                } else {
+                    return false;
+                }
+
+                return true;
+            }),
+            MakeProcessor("serializer-flags", 'f', [](Options &opts, const char *value) {
+                bool result = false;
+                opts.serializer_flags = IntParseHelper(value, result) & 0x1F;
+                return result;
+            }),
+            MakeProcessor("property-mask", 'm', [](Options &opts, const char *value) {
+                bool success = false;
+                opts.property_mask = IntParseHelper(value, success);
+                return success;
+            }),
+            MakeProcessor("shallow", [](Options &opts) { opts.shallow = true; }),
+            MakeProcessor("manual-compression", 'c', [](Options &opts) { opts.manual_compression = true; }),
+            MakeProcessor("quiet", 'q', [](Options &opts) { opts.quiet = true; }),
+            MakeProcessor("skip-unknown", [](Options &opts) { opts.skip_unknown = true; })
+        };
 
         /* Implementation details of option parsing code. */
 
@@ -106,7 +173,11 @@ namespace ptor::cli {
             }
         }
 
-        /* TODO: Check for missing required arguments. */
+        /* We're valid when there's at least any input source. */
+        if (options.input_hex == nullptr && options.input_file.empty()) {
+            /* TODO: Print usage info. */
+            return {};
+        }
 
         return options;
     }
