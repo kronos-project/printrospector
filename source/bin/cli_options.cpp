@@ -48,12 +48,21 @@ namespace ptor::cli {
 
                 return true;
             }),
+            MakeProcessor("data-kind", 'k', [](Options &opts, const char *value) {
+                if (std::strcmp(value, "op") == 0) {
+                    opts.data_kind = DataKind::ObjectProperty;
+                } else {
+                    return false;
+                }
+
+                return true;
+            }),
             MakeProcessor("hex", [](Options &opts, const char *value) {
-                opts.input_type = InputType::ObjectProperty_Hex;
+                opts.input_type = InputType::Hex;
                 opts.input_hex = value;
             }),
             MakeProcessor("infile", 'i', [](Options &opts, const char *value) {
-                opts.input_type = InputType::ObjectProperty_File;
+                opts.input_type = InputType::File;
                 opts.input_file = value;
                 return opts.input_file.has_filename();
             }),
@@ -174,7 +183,7 @@ namespace ptor::cli {
         }
 
         /* We're valid when there's at least any input source. */
-        if (options.input_hex == nullptr && options.input_file.empty()) {
+        if (options.input_type == InputType::Unknown) {
             /* TODO: Print usage info. */
             return {};
         }

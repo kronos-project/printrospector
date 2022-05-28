@@ -27,10 +27,14 @@ namespace ptor::cli {
     };
 
     enum class InputType {
-        ObjectProperty_Hex,
-        ObjectProperty_File,
+        Hex,
+        File,
 
         Unknown,
+    };
+
+    enum class DataKind {
+        ObjectProperty,
     };
 
     enum class SerializerType {
@@ -43,6 +47,7 @@ namespace ptor::cli {
         /* Input/output sources for data to serialize/deserialize. */
         SerializeOpt serialize_opt = SerializeOpt::Deserialize;
         InputType input_type = InputType::Unknown;
+        DataKind data_kind = DataKind::ObjectProperty;
         const char *input_hex = nullptr;
         fs::path input_file{};
         fs::path output{};
