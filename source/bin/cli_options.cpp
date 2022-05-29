@@ -34,7 +34,7 @@ namespace ptor::cli {
             {
                 char *end;
                 errno = 0;
-                value = std::strtoul(str, &end, 0);
+                value = std::strtoul(str, std::addressof(end), 0);
                 success = (str != end && *end == '\0' && errno == 0);
             }
             return value;
@@ -242,7 +242,7 @@ namespace ptor::cli {
                 const auto value_len = std::strlen(value);
                 for (const auto &opt : g_option_processors) {
                     /* Find the option that corresponds to what the user wants help for. */
-                    if (value_len >= 1 && (value[1] == opt.short_name || std::strcmp(opt.name, value + 2) == 0)) {
+                    if ((value_len == 1 && *value == opt.short_name) || std::strcmp(opt.name, value) == 0) {
                         PrintHelpHeader();
 
                         std::string buf;
