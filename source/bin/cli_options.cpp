@@ -27,6 +27,8 @@
 
 namespace ptor::cli {
 
+    /* Implementation details for CLI options and their handling. */
+
     namespace {
 
         inline u32 IntParseHelper(const char *str, bool &success) {
@@ -258,7 +260,11 @@ namespace ptor::cli {
             std::exit(0);
         }
 
-        /* Implementation details of option parsing code. */
+    }
+
+    /* Implementation details of option parsing code. */
+
+    namespace {
 
         P_ALWAYS_INLINE constexpr bool IsShortOption(const char *arg, size_t arg_len) {
             return arg_len >= 2 && arg[0] == '-' && arg[1] != '-';
