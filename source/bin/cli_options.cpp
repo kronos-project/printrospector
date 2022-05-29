@@ -267,7 +267,7 @@ namespace ptor::cli {
     namespace {
 
         P_ALWAYS_INLINE constexpr bool IsShortOption(const char *arg, size_t arg_len) {
-            return arg_len >= 2 && arg[0] == '-' && arg[1] != '-';
+            return arg_len == 2 && arg[0] == '-' && arg[1] != '-';
         }
 
         P_ALWAYS_INLINE constexpr bool IsLongOption(const char *arg, size_t arg_len) {

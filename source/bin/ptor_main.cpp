@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     EnableConsoleColors();
 
     /* Parse command line options. */
-    auto options = ptor::cli::ParseOptionsFromArgs(argc, argv);
+    const auto options = ptor::cli::ParseOptionsFromArgs(argc, argv);
     if (!options) {
         ptor::cli::PrintUsage();
         return 1;
