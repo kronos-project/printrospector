@@ -255,7 +255,7 @@ namespace ptor::cli {
 
             /* At this point, we don't want to proceed parsing further arguments. */
             /* When we get --help, we can immediately opt out and call it a day.  */
-            std::exit(1);
+            std::exit(0);
         }
 
         /* Implementation details of option parsing code. */
