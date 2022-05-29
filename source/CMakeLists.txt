@@ -76,6 +76,7 @@ add_executable(${PROJECT_NAME}
         ptor_types.hpp
 
         util/util_alignment.hpp
+        util/util_byteorder.hpp
         util/util_i_function.hpp
 
         bin/cli_option_processor.hpp

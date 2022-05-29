@@ -59,6 +59,12 @@
 #define P_UNLIKELY    [[unlikely]]
 
 #if defined(__GNUC__) || defined(__clang__)
+    #if defined(__clang__)
+        #define P_COMPILER_CLANG 1
+    #else
+        #define P_COMPILER_GCC 1
+    #endif
+
     #define P_ALWAYS_INLINE        [[gnu::always_inline]] inline
     #define P_ALWAYS_INLINE_LAMBDA __attribute__((always_inline))
     #define P_NOINLINE             [[using gnu: cold, noinline]]
@@ -72,6 +78,8 @@
          } while (false)
 
 #elif defined(_MSC_VER)
+    #define P_COMPILER_MSVC 1
+
     #define P_ALWAYS_INLINE        __forceinline
     #define P_ALWAYS_INLINE_LAMBDA
     #define P_NOINLINE             [[msvc::noinline]]
