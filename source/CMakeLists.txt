@@ -77,6 +77,7 @@ add_executable(${PROJECT_NAME}
 
         util/util_alignment.hpp
         util/util_byteorder.hpp
+        util/util_encoding.hpp
         util/util_i_function.hpp
 
         bin/cli_option_processor.hpp
