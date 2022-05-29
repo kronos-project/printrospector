@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 
 #include "ptor_defines.hpp"
