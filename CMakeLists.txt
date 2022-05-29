@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 project(printrospector
-        DESCRIPTION "A tool for working with serialized ObjectProperty state"
+        DESCRIPTION "A tool for working with KingsIsle data formats"
         VERSION "0.1.0"
         HOMEPAGE_URL "https://github.com/kronos-project/printrospector"
         )
@@ -40,14 +40,13 @@ endif()
 option(PTOR_OPT_INSTALL "Install the printrospector CLI target" OFF) # TODO
 
 # Enforce the C++ standard when this is the top-level project.
-if(PTOR_TOP_LEVEL_PROJECT)
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 ####################
 ## Subdirectories ##
 ####################
 
+add_subdirectory(third-party)
 add_subdirectory(source)

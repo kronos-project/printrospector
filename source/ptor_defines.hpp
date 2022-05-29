@@ -64,7 +64,7 @@
     #define P_NOINLINE             [[using gnu: cold, noinline]]
 
     #define P_BUILTIN_UNREACHABLE() __builtin_unreachable()
-    #define V_ASSUME(expr)                     \
+    #define P_ASSUME(expr)                     \
          do {                                  \
              if (!static_cast<bool>((expr))) { \
                  P_BUILTIN_UNREACHABLE();      \

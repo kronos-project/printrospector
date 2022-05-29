@@ -90,6 +90,13 @@ configure_file(
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # We can't use pretty colors for logging on Windows by default.
+    # Thus, we need this definition in order to fix it.
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DPTOR_OS_WINDOWS=1)
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

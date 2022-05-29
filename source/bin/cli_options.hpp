@@ -64,10 +64,9 @@ namespace ptor::cli {
 
         /* Don't log during processing. */
         bool quiet = false;
-
-        /* Skip unknown types during serialization/deserialization. */
-        bool skip_unknown = false;
     };
+
+    void PrintUsage();
 
     std::optional<Options> ParseOptionsFromArgs(int argc, char **argv);
 

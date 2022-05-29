@@ -16,8 +16,13 @@
 
 #include "bin/cli_options.hpp"
 
-#include <cstring>
+#include <cstdlib>
+#include <string>
 
+#include <fmt/color.h>
+#include <fmt/core.h>
+
+#include "ptor_version.hpp"
 #include "bin/cli_option_processor.hpp"
 
 namespace ptor::cli {
@@ -35,8 +40,15 @@ namespace ptor::cli {
             return value;
         }
 
+        P_NORETURN void HelpCommandImpl(Options &opts, const char *value);
+
         /* Global list of `OptionProcessor`s for all command-line options we accept. */
         const OptionProcessor g_option_processors[] = {
+            MakeProcessor(
+                "help", 'h', "prints help for all options or a specific one",
+                "",
+                [](Options &opts, const char *value) { HelpCommandImpl(opts, value); }
+            ),
             MakeProcessor(
                 "serialize-opt", 'd', "choose between deserialization (default) and serialization",
                 "printrospector lets you choose between whether the input source should be"
@@ -207,6 +219,43 @@ namespace ptor::cli {
             ),
         };
 
+        void PrintHelpHeader() {
+            fmt::print("{} {}.{}.{} ({})\n", PTOR_NAME, PTOR_VERSION, PTOR_GIT_REV);
+            fmt::print("Copyright (c) {}\n", PTOR_AUTHOR);
+            fmt::print("{}\n\n", PTOR_DESCRIPTION);
+        }
+
+        void FormatOptionToBuf(std::string &out, const OptionProcessor &opt) {
+            fmt::format_to(std::back_inserter(out), "--{}", opt.name);
+            if (opt.short_name) {
+                fmt::format_to(std::back_inserter(out), "/-{}", opt.short_name);
+            }
+            out += ':';
+        }
+
+        void HelpCommandImpl(Options &opts, const char *value) {
+            if (value == nullptr) {
+                PrintUsage();
+            } else {
+                const auto value_len = std::strlen(value);
+                for (const auto &opt : g_option_processors) {
+                    /* Find the option that corresponds to what the user wants help for. */
+                    if (value_len >= 1 && (value[1] == opt.short_name || std::strcmp(opt.name, value + 2) == 0)) {
+                        PrintHelpHeader();
+
+                        std::string buf;
+                        FormatOptionToBuf(buf, opt);
+
+                        fmt::print("{} {}\n\n{}\n", buf, opt.short_help, opt.help);
+                    }
+                }
+            }
+
+            /* At this point, we don't want to proceed parsing further arguments. */
+            /* When we get --help, we can immediately opt out and call it a day.  */
+            std::exit(1);
+        }
+
         /* Implementation details of option parsing code. */
 
         P_ALWAYS_INLINE constexpr bool IsShortOption(const char *arg, size_t arg_len) {
@@ -263,6 +312,21 @@ namespace ptor::cli {
 
     }
 
+    void PrintUsage() {
+        PrintHelpHeader();
+
+        fmt::print("Usage: {} [options...]\n\n", PTOR_NAME);
+
+        fmt::print("Options:\n");
+
+        std::string buf;
+        for (const auto &opt : g_option_processors) {
+            FormatOptionToBuf(buf, opt);
+            fmt::print("    {:<30} {}\n", buf, opt.short_help);
+            buf.clear();
+        }
+    }
+
     std::optional<Options> ParseOptionsFromArgs(int argc, char **argv) {
         /* Create a default instance of command line options. */
         Options options{};
@@ -281,14 +345,13 @@ namespace ptor::cli {
 
             /* Check if we succeeded at parsing the current argument. */
             if (!parsed) {
-                /* TODO: Print usage info. */
+                fmt::print(fg(fmt::color::yellow), "Warning: Failed to parse option \"{}\"!\n", arg);
                 return {};
             }
         }
 
         /* We're valid when there's at least any input source. */
         if (options.input_type == InputType::Unknown) {
-            /* TODO: Print usage info. */
             return {};
         }
 
