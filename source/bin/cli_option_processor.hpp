@@ -30,7 +30,7 @@ namespace ptor::cli {
 
     private:
         /* TODO: Shrink storage down to what we really need. */
-        u8 m_handler_storage[sizeof(usize) * 4]{};
+        u8 m_handler_storage[sizeof(usize) * 2]{};
         const CallbackType &m_callback;
 
     public:
