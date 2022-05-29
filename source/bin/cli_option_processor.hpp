@@ -29,7 +29,6 @@ namespace ptor::cli {
         using CallbackType = util::IFunction<bool(Options &, const char *)>;
 
     private:
-        /* TODO: Shrink storage down to what we really need. */
         u8 m_handler_storage[sizeof(usize) * 2]{};
         const CallbackType &m_callback;
 
@@ -72,6 +71,7 @@ namespace ptor::cli {
         }
     }
 
+    /* Specialization for when no short name exists. */
     P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, const char *sh, const char *h, auto f) {
         return MakeProcessor(n, '\0', sh, h, f);
     }

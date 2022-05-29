@@ -72,7 +72,7 @@
          } while (false)
 
 #elif defined(_MSC_VER)
-    #define P_ALWAYS_INLINE        [[msvc::always_inline]]
+    #define P_ALWAYS_INLINE        __forceinline
     #define P_ALWAYS_INLINE_LAMBDA
     #define P_NOINLINE             [[msvc::noinline]]
 

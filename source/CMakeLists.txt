@@ -4,7 +4,7 @@
 
 if(MSVC)
     # Silence "deprecation" warnings.
-    add_definition(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
 
     add_compile_options(
         /W4
@@ -13,7 +13,7 @@ if(MSVC)
         /Zm200
         /Zo
         /permissive-
-        /EHsc-
+        /EHsc
         /GR-
         /utf-8
         /volatile:iso

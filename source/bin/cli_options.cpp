@@ -234,6 +234,8 @@ namespace ptor::cli {
         }
 
         void HelpCommandImpl(Options &opts, const char *value) {
+            P_UNUSED(opts);
+
             if (value == nullptr) {
                 PrintUsage();
             } else {
