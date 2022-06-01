@@ -21,9 +21,9 @@
 
 namespace ptor::cli {
 
-    enum class SerializeOpt {
-        Serialize,
-        Deserialize,
+    enum class EncodeOpt {
+        Encode,
+        Decode,
     };
 
     enum class InputType {
@@ -45,7 +45,7 @@ namespace ptor::cli {
 
     struct Options {
         /* Input/output sources for data to serialize/deserialize. */
-        SerializeOpt serialize_opt = SerializeOpt::Deserialize;
+        EncodeOpt encode_opt = EncodeOpt::Decode;
         InputType input_type = InputType::Unknown;
         DataKind data_kind = DataKind::ObjectProperty;
         const char *input_hex = nullptr;

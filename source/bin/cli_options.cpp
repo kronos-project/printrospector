@@ -52,17 +52,17 @@ namespace ptor::cli {
                 [](Options &opts, const char *value) { HelpCommandImpl(opts, value); }
             ),
             MakeProcessor(
-                "serialize-opt", 'd', "choose between deserialization (default) and serialization",
-                "printrospector lets you choose between whether the input source should be"
+                "encode-opt", 'e', "choose between decoding (default) and encoding",
+                "printrospector lets you choose between whether the input source should be "
                 "interpreted as data to serialize or as data to deserialize.\n\n"
                 "Supported values to this option are:\n\n"
-                "    - ser: Serializes the input data.\n"
-                "    - de:  Deserializes the input data.",
+                "    - en: Encodes the input data.\n"
+                "    - de:  Decodes the input data.",
                 [](Options &opts, const char *value) {
-                    if (std::strcmp(value, "ser") == 0) {
-                        opts.serialize_opt = SerializeOpt::Serialize;
+                    if (std::strcmp(value, "en") == 0) {
+                        opts.encode_opt = EncodeOpt::Encode;
                     } else if (std::strcmp(value, "de") == 0) {
-                        opts.serialize_opt = SerializeOpt::Deserialize;
+                        opts.encode_opt = EncodeOpt::Decode;
                     } else {
                         return false;
                     }
