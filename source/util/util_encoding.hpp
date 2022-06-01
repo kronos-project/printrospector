@@ -94,7 +94,7 @@ namespace ptor::util {
 
     template <typename U, std::endian BO> requires std::unsigned_integral<U>
     P_ALWAYS_INLINE U Decode(const void *buf, size_t nbytes) {
-        U out = U{0};
+        U out{0};
         if constexpr (BO == std::endian::big) {
             impl::DecodeBigEndian<U>(std::addressof(out), buf, nbytes);
             return ToBigEndian<U>(out);

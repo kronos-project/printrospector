@@ -28,7 +28,7 @@ namespace ptor::util {
     }
 
     BinaryBuffer::BinaryBuffer(uint8_t *buf, size_t size)
-        : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{true}
+        : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{false}
     {
         P_ASSERT(buf != nullptr);
     }
@@ -41,6 +41,8 @@ namespace ptor::util {
 
     void BinaryBuffer::Grow(size_t new_capacity) {
         if (m_capacity < new_capacity) {
+            P_ASSERT(m_managed, "growing a borrowed buffer is forbidden!");
+
             /* Back up the current cursor offset to restore it later. */
             const auto cursor_offset = this->GetCursorOffset();
 
