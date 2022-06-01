@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Valentin B.
+ * Copyright (c) 2022 Valentin B.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -22,7 +22,7 @@ namespace ptor::util {
         : m_ptr{nullptr}, m_cursor{nullptr}, m_capacity{capacity}, m_bit_offset{0}, m_managed{true}
     {
         if (capacity != 0) {
-            m_ptr    = new u8[capacity]();
+            m_ptr    = new u8[capacity]{};
             m_cursor = m_ptr;
         }
     }
@@ -39,7 +39,7 @@ namespace ptor::util {
             const auto cursor_offset = this->GetCursorOffset();
 
             /* Allocate a new buffer and copy previous contents over. */
-            auto *new_ptr = new u8[new_capacity]();
+            auto *new_ptr = new u8[new_capacity]{};
             std::memcpy(new_ptr, m_ptr, m_capacity);
             delete[] m_ptr;
 

@@ -19,8 +19,8 @@
 #include <cstdlib>
 #include <string>
 
-#include <fmt/color.h>
-#include <fmt/core.h>
+#include "fmt/color.h"
+#include "fmt/core.h"
 
 #include "ptor_version.hpp"
 #include "bin/cli_option_processor.hpp"

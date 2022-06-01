@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Valentin B.
+ * Copyright (c) 2022 Valentin B.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
