@@ -27,6 +27,12 @@ namespace ptor::util {
         }
     }
 
+    BinaryBuffer::BinaryBuffer(uint8_t *buf, size_t size)
+        : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{true}
+    {
+        P_ASSERT(buf != nullptr);
+    }
+
     BinaryBuffer::~BinaryBuffer() {
         if (m_managed) {
             delete[] m_ptr;

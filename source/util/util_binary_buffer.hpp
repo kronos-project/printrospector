@@ -41,11 +41,7 @@ namespace ptor::util {
         explicit BinaryBuffer(size_t capacity = DefaultCapacity);
 
         /* Construct a BinaryBuffer over a borrowed byte view. */
-        BinaryBuffer(uint8_t *buf, size_t size)
-            : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{true}
-        {
-            P_ASSERT(buf != nullptr);
-        }
+        BinaryBuffer(uint8_t *buf, size_t size);
 
         ~BinaryBuffer();
 
@@ -129,6 +125,8 @@ namespace ptor::util {
     public:
         template <std::integral T, std::endian BO>
         T ReadValue() {
+            static_assert(!std::is_same_v<T, bool>, "use ReadBit() instead");
+
             /* We start reading full bytes at aligned byte boundary. */
             RealignCursorToByte();
 
@@ -144,6 +142,8 @@ namespace ptor::util {
 
         template <std::integral T, std::endian BO>
         void WriteValue(const T value) {
+            static_assert(!std::is_same_v<T, bool>, "use WriteBit() instead");
+
             /* We start reading full bytes at aligned byte boundary. */
             RealignCursorToByte();
 
