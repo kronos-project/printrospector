@@ -72,13 +72,18 @@ endif()
 ###########################
 
 add_executable(${PROJECT_NAME}
+        assert.hpp
+        assert.cpp
         ptor_defines.hpp
         ptor_types.hpp
 
         util/util_alignment.hpp
+        util/util_binary_buffer.hpp
+        util/util_binary_buffer.cpp
         util/util_byteorder.hpp
         util/util_encoding.hpp
         util/util_i_function.hpp
+        util/util_literals.hpp
 
         bin/cli_option_processor.hpp
         bin/cli_options.hpp
@@ -94,6 +99,11 @@ configure_file(
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+
+# Enable debug assertions when not building in some release mode.
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:P_ENABLE_DEBUG_ASSERTIONS>
+        )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # We can't use pretty colors for logging on Windows by default.

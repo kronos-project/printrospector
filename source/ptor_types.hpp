@@ -45,3 +45,15 @@ static_assert(sizeof(f64) == sizeof(u64) && std::numeric_limits<f64>::is_iec559)
 
 using size_t    = std::size_t;
 using ptrdiff_t = std::ptrdiff_t;
+
+#define P_BIT(n) (1u << (n))
+
+#define P_BITL(n) (1ul << (n))
+
+#define P_LSB(n) (P_BIT(n) - 1u)
+
+#define P_LSBL(n) (P_BITL(n) - 1ul)
+
+#define P_MASK(start, end) (P_LSB(end) & ~P_LSB(start))
+
+#define P_MASKL(start, end) (P_LSBL(end) & ~P_LSBL(start))

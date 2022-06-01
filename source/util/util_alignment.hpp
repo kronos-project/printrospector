@@ -18,15 +18,25 @@
 #include <concepts>
 #include <type_traits>
 
-#include "ptor_defines.hpp"
+#include "assert.hpp"
 #include "ptor_types.hpp"
 
 namespace ptor::util {
+
+    namespace impl {
+
+        template <std::integral T>
+        P_ALWAYS_INLINE constexpr bool IsPowerOfTwo(T value) {
+            return value > 0 && (value & (value - 1)) == 0;
+        }
+
+    }
 
     template <typename T>
     P_ALWAYS_INLINE constexpr T AlignUp(T value, size_t align) {
         using U = std::make_unsigned_t<T>;
 
+        P_DEBUG_ASSERT(impl::IsPowerOfTwo(align));
         const U mask = static_cast<U>(align - 1);
         return static_cast<T>((value + mask) & ~mask);
     }
@@ -35,6 +45,7 @@ namespace ptor::util {
     P_ALWAYS_INLINE constexpr T AlignDown(T value, size_t align) {
         using U = std::make_unsigned_t<T>;
 
+        P_DEBUG_ASSERT(impl::IsPowerOfTwo(align));
         const U mask = static_cast<U>(align - 1);
         return static_cast<T>(value & ~mask);
     }
@@ -43,6 +54,7 @@ namespace ptor::util {
     P_ALWAYS_INLINE constexpr bool IsAligned(T value, size_t align) {
         using U = std::make_unsigned_t<T>;
 
+        P_DEBUG_ASSERT(impl::IsPowerOfTwo(align));
         const U mask = static_cast<U>(align - 1);
         return (value & mask) == 0;
     }
