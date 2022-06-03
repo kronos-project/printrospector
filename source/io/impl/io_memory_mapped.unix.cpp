@@ -59,6 +59,8 @@ namespace ptor::io::impl {
         /* Reset rhs back into the default object state. */
         rhs.m_ptr = nullptr;
         rhs.m_len = 0;
+
+        return *this;
     }
 
     void MemoryMappedImpl::Map(int fd, int protect, int flags, size_t offset, size_t len, std::error_code &ec) {

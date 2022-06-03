@@ -100,13 +100,6 @@ namespace ptor::io {
         }
 
     public:
-        P_ALWAYS_INLINE ~MemoryMapped() {
-            /* When the mapping is mutable, flush it to disk to avoid accidental data loss. */
-            if constexpr (Mode == AccessMode::ReadWrite) {
-                this->Flush();
-            }
-        }
-
         MemoryMapped(MemoryMapped &&) = default;
 
         MemoryMapped &operator=(MemoryMapped &&) = default;
@@ -132,11 +125,13 @@ namespace ptor::io {
 
         P_ALWAYS_INLINE constexpr size_t GetLength() const { return m_impl.GetLength(); }
 
-        P_ALWAYS_INLINE std::enable_if_t<Mode == AccessMode::ReadWrite, void> Flush(std::error_code &ec) {
+        P_ALWAYS_INLINE void Flush(std::error_code &ec) {
+            static_assert(Mode == AccessMode::ReadWrite, "can only flush mutable file buffers");
             m_impl.Flush(0, this->GetLength(), ec);
         }
 
-        P_ALWAYS_INLINE std::enable_if_t<Mode == AccessMode::ReadWrite, void> FlushAsync(std::error_code &ec) {
+        P_ALWAYS_INLINE void FlushAsync(std::error_code &ec) {
+            static_assert(Mode == AccessMode::ReadWrite, "can only flush mutable file buffers");
             m_impl.FlushAsync(0, this->GetLength(), ec);
         }
     };

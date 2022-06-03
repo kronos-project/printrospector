@@ -48,13 +48,6 @@ namespace ptor::io::impl {
             return {static_cast<int>(::GetLastError()), std::system_category()};
         }
 
-        bool ProtectionSupported(HANDLE file, DWORD protection) {
-            HANDLE handle = ::CreateFileMappingW(file, nullptr, protection, 0, 0, nullptr);
-            P_ON_SCOPE_EXIT { if (handle != nullptr) { ::CloseHandle(handle); } };
-
-            return handle != nullptr;
-        }
-
     }
 
     MemoryMappedImpl::~MemoryMappedImpl() {
@@ -83,6 +76,8 @@ namespace ptor::io::impl {
         rhs.m_ptr    = nullptr;
         rhs.m_len    = 0;
         rhs.m_handle = INVALID_HANDLE_VALUE;
+
+        return *this;
     }
 
     void MemoryMappedImpl::Map(HANDLE handle, DWORD protect, DWORD access, size_t offset, size_t len, std::error_code &ec) {
@@ -148,8 +143,8 @@ namespace ptor::io::impl {
         /* Attempt to flush the memory region asynchronously. */
         this->FlushAsync(offset, len, ec);
 
-        /* If we got a handle, try to flush its file buffers. */
-        if (!ec && m_handle != INVALID_HANDLE_VALUE) {
+        /* If we maintain a mapping and no error occurred, flush the file buffers. */
+        if (!ec && this->IsMapped()) {
             if (::FlushFileBuffers(m_handle) == 0) {
                 ec = GetLastOsError();
             }
