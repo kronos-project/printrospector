@@ -62,8 +62,8 @@ namespace ptor::io {
                 protect = PAGE_READWRITE;
             }
         #else
-            int protect = PROT_READ;
             int access  = MAP_SHARED;
+            int protect = PROT_READ;
 
             if constexpr (Mode == AccessMode::ReadWrite) {
                 protect |= PROT_WRITE;

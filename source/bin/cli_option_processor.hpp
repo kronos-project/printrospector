@@ -35,15 +35,15 @@ namespace ptor::cli {
 
     public:
         const char *name;
-        char short_name;
-        bool takes_arg;
         const char *short_help;
         const char *help;
+        char short_name;
+        bool takes_arg;
 
     public:
         OptionProcessor(const char *n, char sn, const char *sh, const char *h, bool ta, auto f)
             : m_callback(*reinterpret_cast<const decltype(CallbackType::Make(f)) *>(m_handler_storage)),
-              name(n), short_name(sn), takes_arg(ta), short_help(sh), help(h)
+              name(n), short_help(sh), help(h), short_name(sn), takes_arg(ta)
         {
             using FunctionType = decltype(CallbackType::Make(f));
             static_assert(sizeof(m_handler_storage) >= sizeof(FunctionType));

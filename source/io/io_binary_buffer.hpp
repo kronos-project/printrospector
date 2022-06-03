@@ -30,10 +30,15 @@ namespace ptor::io {
         static constexpr size_t DefaultCapacity = 4_KB;
 
     private:
+        /* Memory view in bytes on which we operate. */
         u8 *m_ptr;
         u8 *m_cursor;
         size_t m_capacity;
+
+        /* The bit offset into the current cursor byte. */
         u8 m_bit_offset;
+
+        /* Whether the above byte view is owned by this object or not. */
         bool m_managed;
 
     public:
