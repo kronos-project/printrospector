@@ -21,7 +21,7 @@
 #include "util/util_encoding.hpp"
 #include "util/util_literals.hpp"
 
-namespace ptor::util {
+namespace ptor::io {
 
     class BinaryBuffer {
         P_DISALLOW_COPY_AND_ASSIGN(BinaryBuffer);

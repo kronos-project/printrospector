@@ -14,21 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "util/util_binary_buffer.hpp"
+#include <new>
 
-namespace ptor::util {
+#include "io/io_binary_buffer.hpp"
+
+namespace ptor::io {
 
     BinaryBuffer::BinaryBuffer(const size_t capacity)
-        : m_ptr{nullptr}, m_cursor{nullptr}, m_capacity{capacity}, m_bit_offset{0}, m_managed{true}
+            : m_ptr{nullptr}, m_cursor{nullptr}, m_capacity{capacity}, m_bit_offset{0}, m_managed{true}
     {
         if (capacity != 0) {
-            m_ptr    = new u8[capacity]{};
+            m_ptr    = new (std::nothrow) u8[capacity]{};
             m_cursor = m_ptr;
+
+            P_ASSERT(m_ptr != nullptr, "failed to allocate {} bytes", capacity);
         }
     }
 
     BinaryBuffer::BinaryBuffer(uint8_t *buf, size_t size)
-        : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{false}
+            : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{false}
     {
         P_ASSERT(buf != nullptr);
     }
@@ -41,13 +45,14 @@ namespace ptor::util {
 
     void BinaryBuffer::Grow(size_t new_capacity) {
         if (m_capacity < new_capacity) {
-            P_ASSERT(m_managed, "growing a borrowed buffer is forbidden!");
+            P_ASSERT(m_managed, "growing a borrowed buffer is forbidden");
 
             /* Back up the current cursor offset to restore it later. */
             const auto cursor_offset = this->GetCursorOffset();
 
             /* Allocate a new buffer and copy previous contents over. */
-            auto *new_ptr = new u8[new_capacity]{};
+            auto *new_ptr = new (std::nothrow) u8[new_capacity]{};
+            P_ASSERT(new_ptr != nullptr, "failed to allocate {} bytes", new_capacity);
             std::memcpy(new_ptr, m_ptr, m_capacity);
             delete[] m_ptr;
 

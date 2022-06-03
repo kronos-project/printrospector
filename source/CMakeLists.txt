@@ -77,13 +77,16 @@ add_executable(${PROJECT_NAME}
         ptor_defines.hpp
         ptor_types.hpp
 
+        io/io_binary_buffer.hpp
+        io/io_binary_buffer.cpp
+        io/io_memory_mapped.hpp
+
         util/util_alignment.hpp
-        util/util_binary_buffer.hpp
-        util/util_binary_buffer.cpp
         util/util_byteorder.hpp
         util/util_encoding.hpp
         util/util_i_function.hpp
         util/util_literals.hpp
+        util/util_scope_guard.hpp
 
         bin/cli_option_processor.hpp
         bin/cli_options.hpp
@@ -97,6 +100,25 @@ configure_file(
     @ONLY
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+        $<$<PLATFORM_ID:Windows>:PTOR_OS_WINDOWS>
+        $<$<PLATFORM_ID:Linux>:PTOR_OS_LINUX>
+        $<$<PLATFORM_ID:Android>:PTOR_OS_ANDROID>
+        $<$<PLATFORM_ID:Darwin>:PTOR_OS_APPLE>
+        )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_sources(${PROJECT_NAME} PRIVATE
+            io/impl/io_memory_mapped.os.windows.hpp
+            io/impl/io_memory_mapped.os.windows.cpp
+            )
+else()
+    target_sources(${PROJECT_NAME} PRIVATE
+            io/impl/io_memory_mapped.unix.hpp
+            io/impl/io_memory_mapped.unix.cpp
+            )
+endif()
+
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 
@@ -104,12 +126,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:P_ENABLE_DEBUG_ASSERTIONS>
         )
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # We can't use pretty colors for logging on Windows by default.
-    # Thus, we need this definition in order to fix it.
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -DPTOR_OS_WINDOWS=1)
-endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
