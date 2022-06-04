@@ -43,7 +43,7 @@ namespace ptor::wad {
         u32 compressed_size;   /* The compressed size of the file, if relevant. */
         bool compressed;       /* Whether the file contents are compressed.     */
         u32 checksum;          /* The CRC32 checksum of the file contents.      */
-        char *path;            /* The archive-relative path of the file.        */
+        fs::path path;         /* The archive-relative path of the file.        */
     };
 
 }

@@ -128,7 +128,7 @@ namespace ptor::io {
         }
 
     public:
-        template <std::integral T, std::endian BO>
+        template <std::integral T, std::endian BO = std::endian::little>
         T ReadValue() {
             static_assert(!std::is_same_v<T, bool>, "use ReadBit() instead");
 
@@ -140,12 +140,12 @@ namespace ptor::io {
             P_ASSERT(this->HasSpaceForBytes(ReadSize), "buffer too short to read {} more bytes", ReadSize);
 
             /* Read the value out of the buffer. */
-            const T value = Decode<T, BO>(m_cursor);
+            const T value = util::Decode<T, BO>(m_cursor);
             m_cursor += ReadSize;
             return value;
         }
 
-        template <std::integral T, std::endian BO>
+        template <std::integral T, std::endian BO = std::endian::little>
         void WriteValue(const T value) {
             static_assert(!std::is_same_v<T, bool>, "use WriteBit() instead");
 
@@ -159,7 +159,7 @@ namespace ptor::io {
             }
 
             /* Write the value to the buffer. */
-            Encode<T, BO>(m_cursor, value);
+            util::Encode<T, BO>(m_cursor, value);
             m_cursor += WriteSize;
         }
 

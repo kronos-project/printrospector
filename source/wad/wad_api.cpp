@@ -16,117 +16,45 @@
 
 #include "wad/wad_api.hpp"
 
-#include <new>
-
 #include "assert.hpp"
 
 namespace ptor::wad {
 
-    namespace impl {
+    namespace {
 
-        Inflater::Inflater(libdeflate_decompressor *d, u8 *buf, size_t size)
-            : m_decompressor{d}, m_buffer{buf}, m_size{size}
-        {
-            P_ASSERT(m_decompressor != nullptr && m_buffer != nullptr);
+        P_ALWAYS_INLINE std::string_view ReadPath(io::BinaryBuffer &buffer) {
+            size_t len = buffer.ReadValue<u32>();
+            char *data = reinterpret_cast<char *>(buffer.GetCursorPtr());
+
+            P_DEBUG_ASSERT(data[len] == '\0', "corrupt file path string");
+            return {data, len};
         }
 
-        Inflater::Inflater(Inflater &&rhs)
-            : m_decompressor{rhs.m_decompressor}, m_buffer{rhs.m_buffer}, m_size{rhs.m_size}
-        {
-            rhs.m_decompressor = nullptr;
-            rhs.m_buffer       = nullptr;
-            rhs.m_size         = 0;
-        }
+    }
 
-        Inflater &Inflater::operator=(Inflater &&rhs) {
-            /* Move the decompressor state over. */
-            m_decompressor = rhs.m_decompressor;
-            m_buffer       = rhs.m_buffer;
-            m_size         = rhs.m_size;
+    Header ReadHeader(io::BinaryBuffer &buffer) {
+        /* Validate the KIWAD archive magic and discard it. */
+        P_ASSERT(std::memcmp(buffer.GetCursorPtr(), ArchiveMagic, 5) == 0, "archive does not start with KIWAD magic");
+        buffer.RewindCursor(5);
 
-            /* Invalidate the other decompressor's state. */
-            rhs.m_decompressor = nullptr;
-            rhs.m_buffer       = nullptr;
-            rhs.m_size         = 0;
+        /* Read the header fields. */
+        const u32 version    = buffer.ReadValue<u32>();
+        const u32 file_count = buffer.ReadValue<u32>();
+        const auto flags     = (version >= 2) ? static_cast<ArchiveFlags>(buffer.ReadValue<u8>()) : ArchiveFlag_None;
 
-            return *this;
-        }
+        return {version, file_count, flags};
+    }
 
-        Inflater::~Inflater() {
-            libdeflate_free_decompressor(m_decompressor);
-            free(m_buffer);
-        }
+    File ReadFile(io::BinaryBuffer &buffer) {
+        /* Read the file metadata fields. */
+        const u32 start_offset      = buffer.ReadValue<u32>();
+        const u32 uncompressed_size = buffer.ReadValue<u32>();
+        const u32 compressed_size   = buffer.ReadValue<u32>();
+        const bool compressed       = buffer.ReadValue<u8>() != 0;
+        const u32 checksum          = buffer.ReadValue<u32>();
+        const fs::path path      = ReadPath(buffer);
 
-        Inflater Inflater::Allocate(std::error_code &ec) {
-            auto *d   = libdeflate_alloc_decompressor();
-            auto *buf = new (std::nothrow) u8[DefaultCapacity]{};
-
-            if (d == nullptr || buf == nullptr) {
-                ec = std::make_error_code(std::errc::not_enough_memory);
-                return {};
-            }
-
-            return Inflater{d, buf, DefaultCapacity};
-        }
-
-        void Inflater::Grow(size_t new_size, std::error_code &ec) {
-            /* Reset the error code back into a successful state. */
-            ec.clear();
-
-            /* Check preconditions. */
-            P_DEBUG_ASSERT(m_size < new_size);
-
-            /* Allocate a new buffer and free the old one. */
-            auto *new_buf = new (std::nothrow) u8[new_size]{};
-            if (new_buf == nullptr) {
-                ec = std::make_error_code(std::errc::not_enough_memory);
-                return;
-            }
-            delete[] m_buffer;
-
-            /* Set the new buffer state. */
-            m_buffer = new_buf;
-            m_size   = new_size;
-        }
-
-        size_t Inflater::DecompressImpl(const void *data, size_t len, std::error_code &ec) {
-            size_t written;
-            switch (libdeflate_zlib_decompress(m_decompressor, data, len, m_buffer, m_size, std::addressof(written))) {
-                case LIBDEFLATE_SUCCESS:
-                    /* We succeeded. Return the actual written bytes. */
-                    return written;
-                case LIBDEFLATE_BAD_DATA:
-                    /* The user provided invalid data, return the error. */
-                    ec = std::make_error_code(std::errc::illegal_byte_sequence);
-                    break;
-                case LIBDEFLATE_INSUFFICIENT_SPACE:
-                    /* We don't have anough memory to complete the operation right now. */
-                    ec = std::make_error_code(std::errc::not_enough_memory);
-                    break;
-                case LIBDEFLATE_SHORT_OUTPUT:
-                    P_UNREACHABLE();
-            }
-
-            return 0;
-        }
-
-        size_t Inflater::Decompress(const void *data, size_t len, std::error_code &ec) {
-            /* Reset the error code back into a successful state. */
-            ec.clear();
-
-            /* Attempt to decompress the supplied data. */
-            size_t written = this->DecompressImpl(data, len, ec);
-            if (ec.value() == static_cast<int>(std::errc::not_enough_memory)) {
-                /* Grow the internal buffer to twice its size and retry. */
-                this->Grow(m_size * 2, ec);
-                if (!ec) {
-                    written = this->DecompressImpl(data, len, ec);
-                }
-            }
-
-            return written;
-        }
-
+        return {start_offset, uncompressed_size, compressed_size, compressed, checksum, path};
     }
 
 }

@@ -87,6 +87,8 @@ add_executable(${PROJECT_NAME}
         util/util_i_function.hpp
         util/util_literals.hpp
         util/util_scope_guard.hpp
+        util/util_zlib_inflater.hpp
+        util/util_zlib_inflater.cpp
 
         wad/wad_api.hpp
         wad/wad_api.cpp
