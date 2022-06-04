@@ -1,3 +1,6 @@
 [submodule "third-party/fmt"]
 	path = third-party/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "third-party/libdeflate"]
+	path = third-party/libdeflate
+	url = https://github.com/ebiggers/libdeflate.git

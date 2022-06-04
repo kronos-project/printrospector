@@ -88,6 +88,10 @@ add_executable(${PROJECT_NAME}
         util/util_literals.hpp
         util/util_scope_guard.hpp
 
+        wad/wad_api.hpp
+        wad/wad_api.cpp
+        wad/wad_types.hpp
+
         bin/cli_option_processor.hpp
         bin/cli_options.hpp
         bin/cli_options.cpp
@@ -120,7 +124,7 @@ else()
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt libdeflate::deflate)
 
 # Enable debug assertions when not building in some release mode.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
