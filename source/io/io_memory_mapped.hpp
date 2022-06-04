@@ -84,7 +84,7 @@ namespace ptor::io {
             }
 
             /* Check preconditions and compute the real length we need to map. */
-            P_ASSERT(file_size <= offset);
+            P_ASSERT(file_size >= offset);
             const u64 len = file_size - offset;
 
             /* Make sure there's no memory map overflow on non-64-bit targets. */

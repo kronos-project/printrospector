@@ -22,7 +22,6 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include "util/util_alignment.hpp"
 
@@ -30,7 +29,7 @@ namespace ptor::io::impl {
 
     namespace {
 
-        static const size_t PageSize = sysconf(_SC_PAGE_SIZE);
+        const size_t PageSize = sysconf(_SC_PAGE_SIZE);
 
         P_ALWAYS_INLINE std::error_code GetLastOsError() {
             return {errno, std::system_category()};
@@ -78,7 +77,7 @@ namespace ptor::io::impl {
         }
 
         /* Memory-map the file view and ensure the operation succeeded. */
-        auto *ptr = mmap(nullptr, aligned_len, protect, flags, fd, aligned_offset);
+        auto *ptr = mmap(nullptr, aligned_len, protect, flags, fd, static_cast<off_t>(aligned_offset));
         if (ptr == MAP_FAILED) {
             ec = GetLastOsError();
             return;
@@ -113,7 +112,7 @@ namespace ptor::io::impl {
 
         /* Compute offset and length with respect to page alignment. */
         const size_t alignment         = (reinterpret_cast<usize>(m_ptr) + offset) % PageSize;
-        const ptrdiff_t aligned_offset = offset - alignment;
+        const auto aligned_offset      = static_cast<ptrdiff_t>(offset - alignment);
         const size_t aligned_len       = len + alignment;
 
         /* Try to flush the memory region. */
@@ -133,7 +132,7 @@ namespace ptor::io::impl {
 
         /* Compute offset and length with respect to page alignment. */
         const size_t alignment         = (reinterpret_cast<usize>(m_ptr) + offset) % PageSize;
-        const ptrdiff_t aligned_offset = offset - alignment;
+        const auto aligned_offset      = static_cast<ptrdiff_t>(offset - alignment);
         const size_t aligned_len       = len + alignment;
 
         /* Try to flush the memory region. */
@@ -155,7 +154,7 @@ namespace ptor::io::impl {
     ec.clear();
 
     /* Try to query file size information by file descriptor. */
-    P_STAT sb;
+    P_STAT sb{};
     if (P_FSTAT(fd, std::addressof(sb)) == 0) {
         return sb.st_size;
     } else {
