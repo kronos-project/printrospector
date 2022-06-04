@@ -136,4 +136,7 @@ namespace ptor::io {
         }
     };
 
+    using ReadOnlyMapped  = MemoryMapped<AccessMode::ReadOnly>;
+    using ReadWriteMapped = MemoryMapped<AccessMode::ReadWrite>;
+
 }
