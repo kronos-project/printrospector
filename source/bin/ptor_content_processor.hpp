@@ -32,7 +32,7 @@ namespace ptor {
         P_DISALLOW_COPY_AND_ASSIGN(ContentProcessor);
         P_DISALLOW_MOVE(ContentProcessor);
 
-    private:
+    public:
         template <u32 Width>
         class ProgressBar {
             P_DISALLOW_COPY_AND_ASSIGN(ProgressBar);

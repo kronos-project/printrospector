@@ -69,8 +69,9 @@ namespace ptor {
             }
 
             /* Extract WAD archive file by file. */
-            for (u32 i = 0; i < ctx.header.file_count; ++i) {
-                const auto &file    = ctx.files[i];
+            ContentProcessor::ProgressBar<60> progress_bar{"Extracting KIWAD archive...", ctx.header.file_count};
+            for (u32 i = 1; i <= ctx.header.file_count; ++i) {
+                const auto &file    = ctx.files[i - 1];
                 const auto contents = wad::GetFileContents(file, ctx.raw_data);
 
                 /* Decompress the file contents, if necessary. */
@@ -84,6 +85,11 @@ namespace ptor {
 
                 /* Write the decompressed file to disk. */
                 WriteFile(out, file, decompressed, ec);
+
+                /* Advance the progress bar every 10 files to lower contention. */
+                if (i % 10 == 0) {
+                    progress_bar.Update(i);
+                }
             }
         }
 
