@@ -53,6 +53,9 @@ namespace ptor::util {
 
         static Inflater Allocate(std::error_code &ec);
 
+        P_ALWAYS_INLINE u8 *GetCurrentBufferPtr() { return m_buffer; }
+        P_ALWAYS_INLINE const u8 *GetCurrentBufferPtr() const { return m_buffer; }
+
     private:
         void Grow(size_t new_size, std::error_code &ec);
 

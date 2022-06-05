@@ -90,7 +90,7 @@ namespace ptor::io {
             /* Make sure there's no memory map overflow on non-64-bit targets. */
             if constexpr (BITSIZEOF(usize) != BITSIZEOF(u64)) {
                 if (len > std::numeric_limits<usize>::max()) {
-                    ec = std::make_error_code(std::errc::not_enough_memory);
+                    ec = std::make_error_code(std::errc::file_too_large);
                     return;
                 }
             }

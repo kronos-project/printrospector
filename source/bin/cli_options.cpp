@@ -114,7 +114,6 @@ namespace ptor::cli {
                 [](Options &opts, const char *value) {
                     opts.input_type = InputType::File;
                     opts.input_file = value;
-                    return fs::is_regular_file(opts.input_file);
                 }
             ),
             MakeProcessor(
@@ -123,7 +122,6 @@ namespace ptor::cli {
                 "best-effort basis without producing any persistent data.",
                 [](Options &opts, const char *value) {
                     opts.output = value;
-                    return fs::is_regular_file(opts.output) || fs::is_directory(opts.output);
                 }
             ),
             MakeProcessor(

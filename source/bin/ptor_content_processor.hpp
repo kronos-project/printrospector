@@ -87,11 +87,11 @@ namespace ptor {
 
         void Save(std::error_code &ec);
 
-    private:
+    public:
         struct ProcessWadContext {
             u8 *raw_data;
-            wad::Header m_header;
-            std::unique_ptr<wad::File[]> m_files;
+            wad::Header header;
+            std::unique_ptr<wad::File[]> files;
         };
 
     private:

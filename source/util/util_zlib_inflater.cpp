@@ -119,7 +119,7 @@ namespace ptor::util {
 
         /* Attempt to decompress the supplied data. */
         size_t written = this->DecompressImpl(data, len, ec);
-        if (ec.value() == static_cast<int>(std::errc::not_enough_memory)) {
+        if (ec == std::errc::not_enough_memory) {
             /* Grow the internal buffer to twice its size and retry. */
             if (this->Grow(m_size * 2, ec); !ec) {
                 written = this->DecompressImpl(data, len, ec);
