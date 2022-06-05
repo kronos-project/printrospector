@@ -26,7 +26,7 @@ namespace ptor::wad {
             size_t len = buffer.ReadValue<u32>();
             char *data = reinterpret_cast<char *>(buffer.GetCursorPtr());
 
-            P_DEBUG_ASSERT(data[len] == '\0', "corrupt file path string");
+            P_ASSERT(data[len] == 0, "corrupt file path string");
             return {data, len};
         }
 
@@ -52,7 +52,7 @@ namespace ptor::wad {
         const u32 compressed_size   = buffer.ReadValue<u32>();
         const bool compressed       = buffer.ReadValue<u8>() != 0;
         const u32 checksum          = buffer.ReadValue<u32>();
-        const fs::path path      = ReadPath(buffer);
+        const fs::path path         = ReadPath(buffer);
 
         return {start_offset, uncompressed_size, compressed_size, compressed, checksum, path};
     }

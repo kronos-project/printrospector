@@ -21,7 +21,7 @@
 namespace ptor::io {
 
     BinaryBuffer::BinaryBuffer(const size_t capacity)
-            : m_ptr{nullptr}, m_cursor{nullptr}, m_capacity{capacity}, m_bit_offset{0}, m_managed{true}
+        : m_ptr{nullptr}, m_cursor{nullptr}, m_capacity{capacity}, m_bit_offset{0}, m_managed{true}
     {
         if (capacity != 0) {
             m_ptr    = new (std::nothrow) u8[capacity]{};
@@ -32,7 +32,7 @@ namespace ptor::io {
     }
 
     BinaryBuffer::BinaryBuffer(uint8_t *buf, size_t size)
-            : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{false}
+        : m_ptr{buf}, m_cursor{buf}, m_capacity{size}, m_bit_offset{0}, m_managed{false}
     {
         P_ASSERT(buf != nullptr);
     }

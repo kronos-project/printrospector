@@ -74,7 +74,7 @@ namespace ptor::cli {
 
     /* Specialization for when no short name exists. */
     P_ALWAYS_INLINE OptionProcessor MakeProcessor(const char *n, const char *sh, const char *h, auto f) {
-        return MakeProcessor(n, '\0', sh, h, f);
+        return MakeProcessor(n, 0, sh, h, f);
     }
 
 }

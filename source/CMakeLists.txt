@@ -90,6 +90,7 @@ add_executable(${PROJECT_NAME}
         util/util_zlib_inflater.hpp
         util/util_zlib_inflater.cpp
 
+        wad/ptor_content_processor.wad.cpp
         wad/wad_api.hpp
         wad/wad_api.cpp
         wad/wad_types.hpp
@@ -97,6 +98,8 @@ add_executable(${PROJECT_NAME}
         bin/cli_option_processor.hpp
         bin/cli_options.hpp
         bin/cli_options.cpp
+        bin/ptor_content_processor.hpp
+        bin/ptor_content_processor.main.cpp
         bin/ptor_main.cpp
         )
 

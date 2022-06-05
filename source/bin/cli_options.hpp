@@ -35,6 +35,7 @@ namespace ptor::cli {
 
     enum class DataKind {
         ObjectProperty,
+        Wad,
     };
 
     enum class SerializerType {

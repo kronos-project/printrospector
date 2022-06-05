@@ -23,7 +23,7 @@
 namespace ptor::impl {
 
     void AssertFailImpl(const SourceLocation &loc, const char *expr) {
-        fmt::print(stderr, fg(fmt::color::red), "Assertion Failure!\n");
+        fmt::print(stderr, fg(fmt::color::red), "\nAssertion Failure!\n");
         fmt::print(stderr, fg(fmt::color::red), "    Expression: {}\n", expr);
         fmt::print(stderr, fg(fmt::color::red), "    Function:   {}\n", loc.func);
         fmt::print(stderr, fg(fmt::color::red), "    Location:   {}:{}\n", loc.file, loc.line);
@@ -31,7 +31,7 @@ namespace ptor::impl {
     }
 
     void ReifiedAssertFailImpl(const SourceLocation &loc, const char *expr, std::string_view format, fmt::format_args args) {
-        fmt::print(stderr,  fg(fmt::color::red), "Assertion Failure: ");
+        fmt::print(stderr,  fg(fmt::color::red), "\nAssertion Failure: ");
         fmt::vprint(stderr, fg(fmt::color::red), format, args);
         fmt::print(stderr,  fg(fmt::color::red), "!\n");
         fmt::print(stderr,  fg(fmt::color::red), "    Expression: {}\n", expr);

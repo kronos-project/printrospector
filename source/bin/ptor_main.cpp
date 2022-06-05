@@ -19,22 +19,42 @@
     #include <windows.h>
 #endif
 
+#include <fmt/core.h>
+#include <fmt/color.h>
+
 #include "bin/cli_options.hpp"
+#include "bin/ptor_content_processor.hpp"
 
 void EnableConsoleColors();
 
 int main(int argc, char **argv) {
+    std::error_code ec;
+
     /* Enable colored console output for logging on Windows. */
     EnableConsoleColors();
 
     /* Parse command line options. */
-    const auto options = ptor::cli::ParseOptionsFromArgs(argc, argv);
+    auto options = ptor::cli::ParseOptionsFromArgs(argc, argv);
     if (!options) {
         ptor::cli::PrintUsage();
         return 1;
     }
 
-    return 0;
+    /* Process the given arguments. */
+    auto processor = ptor::ContentProcessor{std::move(*options)};
+    if (options->encode_opt == ptor::cli::EncodeOpt::Decode) {
+        processor.Process(ec);
+    } else {
+        processor.Save(ec);
+    }
+
+    /* Check the result. */
+    if (ec) {
+        fmt::print(fg(fmt::color::red), "Error during processing: {} (code {})!\n", ec.message(), ec.value());
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 void EnableConsoleColors() {

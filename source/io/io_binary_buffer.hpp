@@ -120,7 +120,7 @@ namespace ptor::io {
             m_cursor += (nbits / BITSIZEOF(u8));
 
             /* Add the remaining bits and account for byte overflow. */
-            m_bit_offset += (nbits & 0x7);
+            m_bit_offset += (nbits & (BITSIZEOF(u8) - 1));
             if (m_bit_offset >= BITSIZEOF(u8)) {
                 m_cursor += 1;
                 m_bit_offset = 0;

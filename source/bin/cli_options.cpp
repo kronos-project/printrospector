@@ -37,7 +37,7 @@ namespace ptor::cli {
                 char *end;
                 errno = 0;
                 value = std::strtoul(str, std::addressof(end), 0);
-                success = (str != end && *end == '\0' && errno == 0);
+                success = (str != end && *end == 0 && errno == 0);
             }
             return value;
         }
@@ -73,11 +73,14 @@ namespace ptor::cli {
             MakeProcessor(
                 "data-kind", 'k', "the type of data to process; defaults to op",
                 "printrospector supports processing data in various different formats:\n\n"
-                "    op - Serialization and deserialization of ObjectProperty binary state. [default]\n\n"
+                "    op  - Serialization and deserialization of ObjectProperty binary state. [default]\n"
+                "    wad - Packing and unpacking WAD archive files.\n\n"
                 "Specified inputs should be in the correct format.",
                 [](Options &opts, const char *value) {
                     if (std::strcmp(value, "op") == 0) {
                         opts.data_kind = DataKind::ObjectProperty;
+                    } else if (std::strcmp(value, "wad") == 0) {
+                        opts.data_kind = DataKind::Wad;
                     } else {
                         return false;
                     }
@@ -111,7 +114,7 @@ namespace ptor::cli {
                 [](Options &opts, const char *value) {
                     opts.input_type = InputType::File;
                     opts.input_file = value;
-                    return opts.input_file.has_filename();
+                    return fs::is_regular_file(opts.input_file);
                 }
             ),
             MakeProcessor(
@@ -120,7 +123,7 @@ namespace ptor::cli {
                 "best-effort basis without producing any persistent data.",
                 [](Options &opts, const char *value) {
                     opts.output = value;
-                    return opts.output.has_filename();
+                    return fs::is_regular_file(opts.output) || fs::is_directory(opts.output);
                 }
             ),
             MakeProcessor(
@@ -135,7 +138,7 @@ namespace ptor::cli {
                 "Note: When [--data-kind/-k] is not set to op, this option will be ignored.",
                 [](Options &opts, const char *value) {
                     opts.type_list = value;
-                    return opts.type_list.has_filename();
+                    return fs::is_regular_file(opts.type_list);
                 }
             ),
             MakeProcessor(
@@ -307,7 +310,7 @@ namespace ptor::cli {
             for (const auto &opt : g_option_processors) {
                 /* Check preconditions. */
                 const auto name_len = std::strlen(opt.name);
-                if (arg_len < name_len || std::memcmp(arg, opt.name, name_len) != 0 || (arg[name_len] != '\0' && arg[name_len] != '=')) {
+                if (arg_len < name_len || std::memcmp(arg, opt.name, name_len) != 0 || (arg[name_len] != 0 && arg[name_len] != '=')) {
                     continue;
                 }
 

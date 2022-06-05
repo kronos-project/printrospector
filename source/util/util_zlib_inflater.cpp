@@ -23,13 +23,13 @@
 namespace ptor::util {
 
     Inflater::Inflater(libdeflate_decompressor *d, u8 *buf, size_t size)
-            : m_decompressor{d}, m_buffer{buf}, m_size{size}
+        : m_decompressor{d}, m_buffer{buf}, m_size{size}
     {
         P_ASSERT(m_decompressor != nullptr && m_buffer != nullptr);
     }
 
     Inflater::Inflater(Inflater &&rhs)
-            : m_decompressor{rhs.m_decompressor}, m_buffer{rhs.m_buffer}, m_size{rhs.m_size}
+        : m_decompressor{rhs.m_decompressor}, m_buffer{rhs.m_buffer}, m_size{rhs.m_size}
     {
         rhs.m_decompressor = nullptr;
         rhs.m_buffer       = nullptr;
@@ -121,8 +121,7 @@ namespace ptor::util {
         size_t written = this->DecompressImpl(data, len, ec);
         if (ec.value() == static_cast<int>(std::errc::not_enough_memory)) {
             /* Grow the internal buffer to twice its size and retry. */
-            this->Grow(m_size * 2, ec);
-            if (!ec) {
+            if (this->Grow(m_size * 2, ec); !ec) {
                 written = this->DecompressImpl(data, len, ec);
             }
         }
