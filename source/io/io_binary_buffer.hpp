@@ -91,7 +91,7 @@ namespace ptor::io {
 
         P_ALWAYS_INLINE void RewindCursor(ptrdiff_t offset = 0) {
             auto *rewound = m_ptr + offset;
-            P_DEBUG_ASSERT(m_ptr <= rewound && rewound <= m_cursor);
+            P_DEBUG_ASSERT(m_ptr <= rewound && rewound <= m_ptr + m_capacity);
             m_cursor = rewound;
         }
 

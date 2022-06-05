@@ -25,8 +25,9 @@ namespace ptor::wad {
         P_ALWAYS_INLINE std::string_view ReadPath(io::BinaryBuffer &buffer) {
             size_t len = buffer.ReadValue<u32>();
             char *data = reinterpret_cast<char *>(buffer.GetCursorPtr());
+            buffer.RewindCursor(buffer.GetCursorOffset() + static_cast<ptrdiff_t>(len));
 
-            P_ASSERT(data[len] == 0, "corrupt file path string");
+            P_ASSERT(data[len - 1] == 0, "corrupt file path string");
             return {data, len};
         }
 
