@@ -57,14 +57,14 @@ namespace ptor::util {
 
     Inflater Inflater::Allocate(std::error_code &ec) {
         auto *d   = libdeflate_alloc_decompressor();
-        auto *buf = new (std::nothrow) u8[DefaultCapacity]{};
+        auto *buf = std::malloc(DefaultCapacity);
 
         if (d == nullptr || buf == nullptr) {
             ec = std::make_error_code(std::errc::not_enough_memory);
             return {};
         }
 
-        return Inflater{d, buf, DefaultCapacity};
+        return Inflater{d, static_cast<u8 *>(buf), DefaultCapacity};
     }
 
     void Inflater::Grow(size_t new_size, std::error_code &ec) {
@@ -73,15 +73,15 @@ namespace ptor::util {
 
         if (new_size > m_size) {
             /* Allocate a new buffer and free the old one. */
-            auto *new_buf = new (std::nothrow) u8[new_size]{};
+            auto *new_buf = std::malloc(new_size);
             if (new_buf == nullptr) {
                 ec = std::make_error_code(std::errc::not_enough_memory);
                 return;
             }
-            delete[] m_buffer;
+            free(m_buffer);
 
             /* Set the new buffer state. */
-            m_buffer = new_buf;
+            m_buffer = static_cast<u8 *>(new_buf);
             m_size   = new_size;
         }
     }
@@ -110,21 +110,15 @@ namespace ptor::util {
         return 0;
     }
 
-    size_t Inflater::Decompress(const void *data, size_t len, size_t hint, std::error_code &ec) {
+    size_t Inflater::Decompress(const void *data, size_t len, size_t size_hint, std::error_code &ec) {
         /* Grow the buffer to the size of the given hint, if necessary. */
-        this->Grow(hint, ec);
-        if (ec) {
+        if (this->Grow(size_hint, ec); ec) {
             return 0;
         }
 
         /* Attempt to decompress the supplied data. */
+        /* TODO: Should we compensate for wrong size hints? */
         size_t written = this->DecompressImpl(data, len, ec);
-        if (ec == std::errc::not_enough_memory) {
-            /* Grow the internal buffer to twice its size and retry. */
-            if (this->Grow(m_size * 2, ec); !ec) {
-                written = this->DecompressImpl(data, len, ec);
-            }
-        }
 
         return written;
     }

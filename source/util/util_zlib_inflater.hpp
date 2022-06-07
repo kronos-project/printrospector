@@ -32,7 +32,7 @@ namespace ptor::util {
         P_DISALLOW_COPY_AND_ASSIGN(Inflater);
 
     public:
-        static constexpr size_t DefaultCapacity = 32_KB;
+        static constexpr size_t DefaultCapacity = 64_MB;
 
     private:
         libdeflate_decompressor *m_decompressor;
@@ -62,7 +62,7 @@ namespace ptor::util {
         size_t DecompressImpl(const void *data, size_t len, std::error_code &ec);
 
     public:
-        size_t Decompress(const void *data, size_t len, size_t hint, std::error_code &ec);
+        size_t Decompress(const void *data, size_t len, size_t size_hint, std::error_code &ec);
     };
 
 }

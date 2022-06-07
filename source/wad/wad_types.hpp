@@ -38,7 +38,7 @@ namespace ptor::wad {
 
     /* Metadata for an archived file. */
     struct File {
-        u32 start_offset;      /* The starting offset of the file contents.     */
+        u8 *content_ptr;       /* Pointer to the file contents in the archive.  */
         u32 uncompressed_size; /* The uncompressed size of the file contents.   */
         u32 compressed_size;   /* The compressed size of the file, if relevant. */
         bool compressed;       /* Whether the file contents are compressed.     */

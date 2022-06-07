@@ -110,6 +110,10 @@ configure_file(
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+        # Windows API nonsense.
+        $<$<PLATFORM_ID:Windows>:NOMINMAX>
+
+        # Macros for platform-specific implementation details.
         $<$<PLATFORM_ID:Windows>:PTOR_OS_WINDOWS>
         $<$<PLATFORM_ID:Linux>:PTOR_OS_LINUX>
         $<$<PLATFORM_ID:Android>:PTOR_OS_ANDROID>
@@ -129,6 +133,7 @@ else()
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt libdeflate::deflate)
 
 # Enable debug assertions when not building in some release mode.

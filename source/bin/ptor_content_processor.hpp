@@ -57,7 +57,7 @@ namespace ptor {
                 fmt::print(" Done!\n");
             }
 
-            void Update(size_t new_current) {
+            P_ALWAYS_INLINE void Update(size_t new_current) {
                 m_current = new_current;
 
                 if (const u32 cells = (m_current * Width) / m_total; cells != m_cells) {
@@ -87,7 +87,7 @@ namespace ptor {
 
         void Save(std::error_code &ec);
 
-    public:
+    private:
         struct ProcessWadContext {
             u8 *raw_data;
             wad::Header header;

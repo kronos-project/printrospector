@@ -26,7 +26,7 @@ namespace ptor {
 
     namespace {
 
-        void WriteFile(const fs::path &outdir, const wad::File &file, const u8 *data, std::error_code &ec) {
+        inline void WriteFile(const fs::path &outdir, const wad::File &file, const u8 *data, std::error_code &ec) {
             const fs::path &outfile = outdir / file.path;
 
             /* Attempt to create the directory for the output file. */
@@ -34,7 +34,7 @@ namespace ptor {
                 return;
             }
 
-            /* Write the file contents. */
+            /* Write the file contents to the designated output files. */
             FILE *fp = std::fopen(outfile.string().c_str(), "wb");
             if (fp != nullptr) {
                 if (std::fwrite(data, sizeof(u8), file.uncompressed_size, fp) != file.uncompressed_size) {
@@ -46,50 +46,35 @@ namespace ptor {
             }
         }
 
-        void ExtractArchive(ContentProcessor::ProcessWadContext &ctx, u8 *data, size_t len, fs::path &out, std::error_code &ec) {
-            io::BinaryBuffer buffer{data, len};
+        void ExtractArchive(const fs::path &outdir, const wad::File *files, u32 file_count, std::error_code &ec) {
+            /* Try to allocate the zlib inflater for handling decompression. */
             auto inflater = util::Inflater::Allocate(ec);
             if (ec) {
                 return;
             }
 
-            /* Initialize the context. */
-            ctx.raw_data = data;
-            ctx.header   = wad::ReadHeader(buffer);
-            ctx.files    = std::make_unique<wad::File[]>(static_cast<size_t>(ctx.header.file_count));
-
-            /* Deserialize all the file structures. */
-            for (u32 i = 0; i < ctx.header.file_count; ++i) {
-                ctx.files[i] = wad::ReadFile(buffer);
-            }
-
-            /* Create the output directory for the extracted files, if not exists. */
-            if (fs::create_directories(out, ec); ec) {
-                return;
-            }
-
-            /* Extract WAD archive file by file. */
-            ContentProcessor::ProgressBar<60> progress_bar{"Extracting KIWAD archive...", ctx.header.file_count};
-            for (u32 i = 1; i <= ctx.header.file_count; ++i) {
-                const auto &file    = ctx.files[i - 1];
-                const auto contents = wad::GetFileContents(file, ctx.raw_data);
+            /* Extract the archive file by file. */
+            ContentProcessor::ProgressBar<30> progress{"Extracting KIWAD archive...", file_count};
+            for (u32 i = 0; i < file_count; ++i) {
+                const auto &file     = files[i];
+                const auto *contents = file.content_ptr;
 
                 /* Decompress the file contents, if necessary. */
-                const u8 *decompressed = contents.data();
                 if (file.compressed) {
-                    if (inflater.Decompress(decompressed, contents.size_bytes(), file.uncompressed_size, ec); ec) {
+                    if (inflater.Decompress(contents, file.compressed_size, file.uncompressed_size, ec); ec) {
                         return;
                     }
-                    decompressed = inflater.GetCurrentBufferPtr();
+                    contents = inflater.GetCurrentBufferPtr();
                 }
 
                 /* Write the decompressed file to disk. */
-                WriteFile(out, file, decompressed, ec);
-
-                /* Advance the progress bar every 10 files to lower contention. */
-                if (i % 10 == 0) {
-                    progress_bar.Update(i);
+                WriteFile(outdir, file, contents, ec);
+                if (ec) {
+                    return;
                 }
+
+                /* Report progress for the user. */
+                progress.Update(i + 1);
             }
         }
 
@@ -98,6 +83,28 @@ namespace ptor {
     void ContentProcessor::ProcessWad(std::error_code &ec) {
         /* Create the context for processing. */
         ProcessWadContext ctx{};
+
+        auto extract_archive_impl = [&](u8 *data, size_t len) P_ALWAYS_INLINE_LAMBDA {
+            io::BinaryBuffer buffer{data, len};
+
+            /* Initialize the context. */
+            ctx.raw_data = data;
+            ctx.header   = wad::ReadHeader(buffer);
+            ctx.files    = std::make_unique<wad::File[]>(static_cast<size_t>(ctx.header.file_count));
+
+            /* Deserialize all the file structures. */
+            for (u32 i = 0; i < ctx.header.file_count; ++i) {
+                ctx.files[i] = wad::ReadFile(ctx.raw_data, buffer);
+            }
+
+            /* Create the output directory for the extracted files, if not exists. */
+            if (fs::create_directories(m_options.output, ec); ec) {
+                return;
+            }
+
+            /* Extract all the files in the archive. */
+            ExtractArchive(m_options.output, ctx.files.get(), ctx.header.file_count, ec);
+        };
 
         if (m_options.input_type == cli::InputType::File) {
             /* Attempt to open the supplied input source. */
@@ -115,7 +122,7 @@ namespace ptor {
             }
 
             /* Do the extraction work. */
-            ExtractArchive(ctx, mapped.GetPtr(), mapped.GetLength(), m_options.output, ec);
+            extract_archive_impl(mapped.GetPtr(), mapped.GetLength());
         } else {
             P_DEBUG_ASSERT(m_options.input_type == cli::InputType::Hex);
 

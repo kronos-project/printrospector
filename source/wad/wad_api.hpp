@@ -24,11 +24,6 @@ namespace ptor::wad {
 
     Header ReadHeader(io::BinaryBuffer &buffer);
 
-    File ReadFile(io::BinaryBuffer &buffer);
-
-    P_ALWAYS_INLINE std::span<u8> GetFileContents(const File &file, u8 *archive) {
-        size_t file_size = file.compressed ? file.compressed_size : file.uncompressed_size;
-        return {archive + file.start_offset, file_size};
-    }
+    File ReadFile(u8 *archive, io::BinaryBuffer &buffer);
 
 }

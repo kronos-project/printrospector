@@ -46,7 +46,7 @@ namespace ptor::wad {
         return {version, file_count, flags};
     }
 
-    File ReadFile(io::BinaryBuffer &buffer) {
+    File ReadFile(u8 *archive, io::BinaryBuffer &buffer) {
         /* Read the file metadata fields. */
         const u32 start_offset      = buffer.ReadValue<u32>();
         const u32 uncompressed_size = buffer.ReadValue<u32>();
@@ -55,7 +55,14 @@ namespace ptor::wad {
         const u32 checksum          = buffer.ReadValue<u32>();
         const fs::path path         = ReadPath(buffer);
 
-        return {start_offset, uncompressed_size, compressed_size, compressed, checksum, path};
+        /* Assert that we can safely reference data at `start_offset`. */
+        {
+            const auto file_start = start_offset - buffer.GetCursorOffset();
+            const auto file_size  = compressed ? compressed_size : uncompressed_size;
+            P_ASSERT(buffer.HasSpaceForBytes(file_start + file_size), "KIWAD archive corrupt: prematurely found EOF");
+        }
+
+        return {archive + start_offset, uncompressed_size, compressed_size, compressed, checksum, path};
     }
 
 }
